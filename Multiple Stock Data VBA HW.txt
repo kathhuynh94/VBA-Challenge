@@ -1,0 +1,99 @@
+Sub stockeval():
+
+'loops/runs through each sheet in the workbook
+Dim WS As Worksheet
+    For Each WS In ActiveWorkbook.Worksheets
+    WS.Activate
+
+    'finding the last row in the WS
+    LastRow = WS.Cells(Rows.Count, 1).End(xlUp).Row
+
+'declaring variable for the value
+Dim Ticker As String
+Dim OpenPrice As Double
+Dim ClosePrice As Double
+Dim YearlyChange As Double
+Dim PercentChange As Double
+Dim TotalStockVolume As Double
+TotalStockVolume = 0
+Dim Row As Double
+Row = 2
+Dim Column As Integer
+Column = 1
+Dim i As Long
+
+'inserting value/word in specified cell
+Cells(1, "I").Value = "Ticker"
+Cells(1, "J").Value = "YearlyChange"
+Cells(1, "K").Value = "PercentChange"
+Cells(1, "L").Value = "TotalStockVolume"
+
+
+'Set Initial Open Price
+OpenPrice = Cells(2, Column + 2).Value
+
+' Loop through all ticker symbol
+        For i = 2 To LastRow
+        
+         ' Check if we still have the same ticker letters and if not
+            If Cells(i + 1, Column).Value <> Cells(i, Column).Value Then
+            
+                ' Set Ticker name
+                Ticker = Cells(i, Column).Value
+                Cells(Row, Column + 8).Value = Ticker
+                
+                ' Set Close Price
+                ClosePrice = Cells(i, Column + 5).Value
+                
+                ' Add Yearly Change
+                YearlyChange = ClosePrice - OpenPrice
+                Cells(Row, Column + 9).Value = YearlyChange
+
+                ' Adding Percent Change
+                If (OpenPrice = 0 And ClosePrice = 0) Then
+                    PercentChange = 0
+                ElseIf (OpenPrice = 0 And ClosePrice <> 0) Then
+                    PercentChange = 1
+                Else
+                    PercentChange = YearlyChange / OpenPrice
+                    Cells(Row, Column + 10).Value = PercentChange
+                    Cells(Row, Column + 10).NumberFormat = "0.00%"
+                End If
+                
+                ' Adding Total Volume
+                TotalStockVolume = TotalStockVolume + Cells(i, Column + 6).Value
+                Cells(Row, Column + 11).Value = Volume
+
+                ' Add one to the summary table row
+                Row = Row + 1
+
+                ' reset the Open Price
+                OpenPrice = Cells(i + 1, Column + 2)
+
+                ' reset the Volume Total
+                TotalStockVolume = 0
+
+            'if cells are the same ticker
+            Else
+                TotalStockVolume = TotalStockVolume + Cells(i, Column + 6).Value
+            End If
+        Next i
+        
+        ' Determine the Last Row of Yearly Change per WS
+        YCLastRow = WS.Cells(Rows.Count, Column + 8).End(xlUp).Row
+
+        ' adding color to the cells
+        For j = 2 To YCLastRow
+            If (Cells(j, Column + 9).Value > 0 Or Cells(j, Column + 9).Value = 0) Then
+                Cells(j, Column + 9).Interior.ColorIndex = 10
+            ElseIf Cells(j, Column + 9).Value < 0 Then
+                Cells(j, Column + 9).Interior.ColorIndex = 3
+            End If
+        Next j
+        
+    Next WS
+        
+End Sub
+
+
+
